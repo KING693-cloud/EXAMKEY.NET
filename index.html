@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EXAMKEY.NET | Institutional Intelligence Terminal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --g-blue: #1a73e8; --g-red: #ea4335; --g-yellow: #fbbc04; --g-green: #34a853;
+            --bg: #000000; --surface: #0a0a0a; --border: #1f1f1f;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: #ffffff;
+            font-size: 11px;
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+        /* --- AUTHENTICATION MODAL --- */
+        #checker-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.99);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            z-index: 100000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            width: 88%;
+            max-width: 380px;
+            background: #000;
+            padding: 50px 25px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .loader-ring {
+            width: 45px; height: 45px;
+            border: 4px solid #111;
+            border-top: 4px solid var(--g-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 30px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- NAVIGATION --- */
+        .header-nav {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            position: sticky;
+            top: 0; z-index: 5000;
+            border-bottom: 1px solid var(--border);
+            width: 100%;
+        }
+
+        .premium-btn {
+            height: 48px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 900;
+            border: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            letter-spacing: 0.5px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-access {
+            background: linear-gradient(135deg, var(--g-green), #267a3d);
+            color: white;
+            width: 90px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(52, 168, 83, 0.2);
+        }
+
+        .btn-auth {
+            background: linear-gradient(135deg, var(--g-blue), #1557b0);
+            color: white;
+            width: 85px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+        }
+
+        .premium-btn:active { transform: scale(0.94); filter: brightness(1.2); }
+
+        .pin-field {
+            flex-grow: 1;
+            min-width: 0;
+            height: 48px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 900;
+            background: #0f0f0f;
+            color: #fff;
+            outline: none;
+            letter-spacing: 3px;
+        }
+
+        /* --- CONTENT AREA --- */
+        .content-area { padding: 30px 15px; }
+        .label-row { font-size: 10px; font-weight: 900; color: #4285f4; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.5px; }
+        
+        .drop-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        
+        .drop-item {
+            background: linear-gradient(145deg, #0a0a0a, #141414);
+            padding: 24px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--g-green);
+        }
+        
+        .motion-in { animation: slideUp 0.6s backwards; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .drop-item b { font-size: 14px; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .drop-item span { font-size: 8px; color: #fff; background: var(--g-green); padding: 5px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; }
+
+        .news-card {
+            background: #050505;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--g-red);
+        }
+
+        .news-card h3 { font-size: 16px; color: #fff; margin-bottom: 8px; line-height: 1.4; font-weight: 700; }
+        .news-card p { font-size: 12px; color: #9aa0a6; line-height: 1.7; }
+        .news-meta { display: flex; justify-content: space-between; font-size: 9px; color: var(--g-blue); margin-bottom: 12px; font-weight: 900; text-transform: uppercase; }
+
+        .footer-note { text-align: center; padding: 60px 20px; font-size: 8px; color: #333; letter-spacing: 2px; border-top: 1px solid #111; line-height: 2.2; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div id="checker-modal">
+    <div class="modal-box">
+        <div class="loader-ring"></div>
+        <div id="log-status" style="font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--g-blue); text-transform: uppercase; letter-spacing: 1.5px;">
+            Establishing Secure Handshake...
+        </div>
+        <button id="abort-btn" onclick="closeModal()" style="display:none; margin-top:25px;" class="premium-btn btn-auth" style="width:100%">Terminate Link</button>
+    </div>
+</div>
+
+<nav class="header-nav">
+    <button class="premium-btn btn-access" 
+            onclick="window.location.href='https://wa.me/2347041423637?text=Hello%20ExamKey%20Support,%20I%20am%20interested%20in%20obtaining%20an%20access%20key%20for%20my%20specific%20subjects.%20Could%20you%20please%20guide%20me%20on%20the%20process?'">
+        <i class="fa fa-envelope"></i> GET YOUR KEY
+    </button>
+    <input type="number" id="userPin" class="pin-field" placeholder="•••••" oninput="if(this.value.length > 5) this.value = this.value.slice(0,5);">
+    <button class="premium-btn btn-auth" id="viewBtn">
+        <i class="fa fa-shield-alt"></i> Access
+    </button>
+</nav>
+
+
+<div class="content-area">
+    <div class="label-row"><i class="fa fa-sync-alt fa-spin"></i> Live Synchronization Cluster</div>
+    <div class="drop-grid" id="live-drops">
+        <!-- Newest 6 Records Appear Here -->
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="label-row" style="color:var(--g-red)"><i class="fa fa-tower-broadcast"></i> Institutional Intelligence Feed</div>
+    <div id="google-news-feed"></div>
+</div>
+
+<div class="footer-note">
+    INFRASTRUCTURE v22.1.0 (STABLE)<br>
+    Sovereign Data Link &bull; Nigeria Regional Node<br>
+    &copy; 2026 EXAMKEY.NET OFFICIAL RECORD
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, limit, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const config = {
+        apiKey: "AIzaSyCV_DNVJwg9fE_ND9lwqfzAYVAi-MZDfj0",
+        authDomain: "exam-key-7943c.firebaseapp.com",
+        projectId: "exam-key-7943c",
+        storageBucket: "exam-key-7943c.firebasestorage.app",
+        messagingSenderId: "712629635682",
+        appId: "1:712629635682:web:dc063709ca6ecdb85c1f3b"
+    };
+
+    const app = initializeApp(config);
+    const db = getFirestore(app);
+
+    // --- SORTED SYNC ENGINE ---
+    async function syncRecords() {
+        const grid = document.getElementById('live-drops');
+        try {
+            // Sort by 'lastSync' in descending order to get the newest first
+            const q = query(collection(db, "keys"), orderBy("lastSync", "desc"), limit(6));
+            const snap = await getDocs(q);
+            
+            if(!snap.empty) {
+                let tempContent = "";
+                snap.forEach((doc) => {
+                    const data = doc.data();
+                    tempContent += `
+                        <div class="drop-item motion-in">
+                            <b>${data.subjectName || "Institutional Record"}</b>
+                            <span>Verified</span>
+                        </div>`;
+                });
+                
+                if (grid.innerHTML !== tempContent) {
+                    grid.innerHTML = tempContent;
+                }
+            }
+        } catch (e) { 
+            console.warn("Node Latency or Index required in Firebase."); 
+        }
+    }
+
+    // Authentication Protocol
+    async function handleAuth() {
+        const pin = document.getElementById('userPin').value.trim();
+        const modal = document.getElementById('checker-modal');
+        const status = document.getElementById('log-status');
+        const abort = document.getElementById('abort-btn');
+
+        if(!pin || pin.length !== 5) {
+            status.innerHTML = "Protocol Error: 5-Digit Key Required";
+            status.style.color = "var(--g-red)";
+            modal.style.display = "flex";
+            abort.style.display = "block";
+            return;
+        }
+
+        modal.style.display = "flex";
+        status.innerHTML = "Authenticating Signature: " + pin + "...";
+
+        try {
+            const docSnap = await getDoc(doc(db, "keys", pin));
+            if (docSnap.exists()) {
+                const nodeData = docSnap.data();
+                localStorage.setItem('activeSubject', nodeData.subjectName);
+                localStorage.setItem('activeVaultID', nodeData.vaultID);
+                status.innerHTML = "Handshake Confirmed. Accessing Node...";
+                status.style.color = "var(--g-green)";
+                setTimeout(() => { window.location.href = "secret.html"; }, 1500);
+            } else {
+                status.innerHTML = "Access Denied: Signature Mismatch.";
+                status.style.color = "var(--g-red)";
+                abort.style.display = "block";
+            }
+        } catch (e) { 
+            status.innerHTML = "Gateway Timeout. Check Device Link.";
+            abort.style.display = "block";
+        }
+    }
+
+    const intelData = [
+        { t: "Official: 2026 UTME Minimum Benchmarks Finalized", d: "JAMB institutional policy confirms 150 for University and 100 for Polytechnic eligibility." },
+        { t: "Verification: 1.96m Candidates Authenticated for WASSCE", d: "Records confirm total registration success for the 2026 May/June cycle across all regions." },
+        { t: "Institutional: LASU Secures National Application Record", d: "Validated data identifies LASU as the primary choice for 84,426 applicants in 2026." },
+        { t: "Security: Federal Mandate for 100% Biometric Matching", d: "Institutional bodies enforce NIN-synchronization for all 2026 record distributions." },
+        { t: "Digital: NECO Full CBT Rollout Approved for 2026 Cycle", d: "The National Examination Council completes transition to comprehensive digital testing." },
+        { t: "Results: WAEC 45-Day Processing Pipeline Active", d: "Institutional automation ensures rapid data release post-examination for 2026 schedules." },
+        { t: "Finance: Education Trust Fund Crosses 500k Milestone", d: "Federal reports show record engagement for the 2026 tertiary funding initiative." },
+        { t: "Academic: STEM Elective Proficiency Reaches All-Time High", d: "Intelligence analysis indicates significant score growth in regional science assessments." }
+    ];
+
+    function updateIntel() {
+        const feed = document.getElementById('google-news-feed');
+        const randomized = [...intelData].sort(() => 0.5 - Math.random());
+        feed.innerHTML = randomized.map(item => `
+            <div class="news-card">
+                <div class="news-meta">
+                    <span><i class="fab fa-google"></i> Intel Node</span>
+                    <span>Verified</span>
+                </div>
+                <h3>${item.t}</h3>
+                <p>${item.d}</p>
+            </div>`).join('');
+    }
+
+    document.getElementById('viewBtn').onclick = handleAuth;
+    window.closeModal = () => { 
+        document.getElementById('checker-modal').style.display = "none"; 
+        document.getElementById('abort-btn').style.display = "none"; 
+        document.getElementById('log-status').style.color = "var(--g-blue)";
+    };
+
+    // Global Engine Init
+    syncRecords();
+    updateIntel();
+    setInterval(syncRecords, 5000);
+    setInterval(updateIntel, 60000);
+</script>
+</body>
+</html>
